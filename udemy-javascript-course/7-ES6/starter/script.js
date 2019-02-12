@@ -1,6 +1,7 @@
 //////////////////////
 // Classes
 // make it easier to implement inheritance
+// testing
 
 // !!!  Classes declarations are not hoisted
 // first implement and then start using it
