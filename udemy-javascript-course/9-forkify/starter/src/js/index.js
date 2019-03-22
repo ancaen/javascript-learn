@@ -1,4 +1,9 @@
 import Search from './models/Search';
+import Recice from './models/Recipe';
+import * as searchView from './views/searchView';
+import * as recipeView from './views/recipeView';
+import { elements, renderLoader, clearLoader } from './views/base';
+import Recipe from './models/Recipe';
 
 /** Global state of the app
  * - Search object
@@ -8,26 +13,90 @@ import Search from './models/Search';
  */
 const state = {};
 
+/**
+ * SEARCH CONTROLLER
+ */
 const controlSearch = async () => {
     //1 get the query from the view
-    const query = 'pizza'; //TO DO 
+    const query = searchView.getInput(); 
 
     if (query) {
         //2 new search object and add to state
         state.search = new Search(query);
 
         //3 Prep UI for results
+        searchView.clearInput();
+        searchView.clearResults();
+        renderLoader(elements.searchRes);
 
+        try {
         //4 Search for recipes
         await state.search.getResults();
 
         //5 render results on UI
-        console.log(state.search.result);
+        clearLoader();
+        searchView.renderResults(state.search.result);
+        } catch (error) {
+            alert('Something went wrong with the search');
+            clearLoader();
+        }
 
     }
 };
 
-document.querySelector('.search').addEventListener('submit', e => {
+elements.searchForm.addEventListener('submit', e => {
     e.preventDefault();
     controlSearch();
 });
+
+
+elements.searchResPages.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-inline');
+    if (btn) {
+        const goToPage = parseInt(btn.dataset.goto, 10);
+        searchView.clearResults();
+        searchView.renderResults(state.search.result, goToPage);
+    }
+    
+});
+
+/**
+ * RECIPE CONTROLLER
+ */
+
+const controlRecipe = async () => {
+    //Get ID from url
+    const id = window.location.hash.replace('#', '');
+    console.log(id);
+
+    if (id) {
+        //prepare UI for changes
+        recipeView.clearRecipe();
+        renderLoader(elements.recipe);
+
+        //create new recipe object
+        state.recipe = new Recipe(id);
+        window.r = state.recipe;
+
+        try {
+            //get recipe date and parse ing
+            await state.recipe.getRecipe();
+            state.recipe.parseIngredients();
+
+            //calculate servings and time
+            state.recipe.calcServings();
+            state.recipe.calcTime();
+
+        //render recipe
+            clearLoader();
+            recipeView.renderRecipe(state.recipe);
+        } catch (error) {
+            alert('Error processing recipe');
+        }
+        
+    }
+    
+};
+
+
+['hashchange', 'load'].forEach( event => window.addEventListener(event, controlRecipe));
