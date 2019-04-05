@@ -1,5 +1,5 @@
 export default class Likes {
-
+    
     constructor() {
         this.likes = [];
     }
@@ -7,9 +7,9 @@ export default class Likes {
     addLike(id, title, author, img) {
         const item = {
             id,
-            title
+            title,
             author,
-            img
+            img,
         };
         this.likes.push(item);
         return item;
@@ -17,7 +17,7 @@ export default class Likes {
 
     deleteLike(id) {
         const index = this.likes.findIndex(el => el.id === id);
-        if (index) this.likes.splice(index, 1);
+        if (index !== -1) this.likes.splice(index, 1);
     }
 
     isLiked(id) {
